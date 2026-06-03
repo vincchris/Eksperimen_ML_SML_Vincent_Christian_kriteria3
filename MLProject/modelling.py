@@ -193,6 +193,7 @@ def train_and_log(model_name, model, params,
 def run(preproc_dir, use_dagshub, repo_owner, repo_name):
     if use_dagshub:
         import dagshub
+        # Init Dagshub
         dagshub.init(repo_owner='vincchris', repo_name='Eksperimen_ML_SML_Vincent_Christian-', mlflow=True)
         log(f"DagsHub aktif: https://dagshub.com/{repo_owner}/{repo_name}.mlflow")
     else:
