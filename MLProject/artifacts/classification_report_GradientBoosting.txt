@@ -1,0 +1,10 @@
+Classification Report — GradientBoosting
+==================================================
+              precision    recall  f1-score   support
+
+        Rugi       0.91      0.81      0.86      2509
+      Untung       0.94      0.97      0.96      7749
+
+    accuracy                           0.93     10258
+   macro avg       0.92      0.89      0.91     10258
+weighted avg       0.93      0.93      0.93     10258

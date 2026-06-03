@@ -1,0 +1,10 @@
+Classification Report — RandomForest
+==================================================
+              precision    recall  f1-score   support
+
+        Rugi       0.89      0.83      0.86      2509
+      Untung       0.95      0.97      0.96      7749
+
+    accuracy                           0.93     10258
+   macro avg       0.92      0.90      0.91     10258
+weighted avg       0.93      0.93      0.93     10258
