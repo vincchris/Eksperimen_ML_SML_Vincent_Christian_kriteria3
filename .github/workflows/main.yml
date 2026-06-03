@@ -35,11 +35,16 @@ jobs:
           cd MLProject
           mlflow run .
 
-      - name: Upload MLflow Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: mlflow-results
-          path: MLProject/mlruns
+      - name: Upload to Github
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+
+          git commit -m "Auto update preprocessing dataset" || echo "No changes to commit"
+
+          git push
 
       - name: Login Docker Hub
         uses: docker/login-action@v3
