@@ -1,3 +1,24 @@
+"""
+modelling.py
+=============
+Machine Learning pipeline tanpa hyperparameter tuning, dengan MLflow manual logging.
+Dataset : Enhanced Superstore Sales — hasil preprocessing dari folder
+          preprocessing/namadataset_preprocessing/
+
+Cara menjalankan
+----------------
+1. Install dependensi:
+       pip install mlflow scikit-learn pandas numpy matplotlib seaborn dagshub
+
+2a. Local:
+       python modelling.py
+       mlflow ui --port 5000
+       Buka http://localhost:5000
+
+2b. DagsHub:
+       python modelling.py --dagshub --repo-owner <username> --repo-name <repo>
+"""
+
 import os
 import argparse
 import warnings
@@ -21,7 +42,9 @@ from sklearn.metrics import (
 
 warnings.filterwarnings("ignore")
 
-PREPROC_DIR  = "global_superstore_preprocessing"
+
+# ── Konfigurasi ────────────────────────────────────────────────────────────────
+PREPROC_DIR  = "preprocessing/namadataset_preprocessing"
 ARTIFACT_DIR = "artifacts"
 EXPERIMENT   = "Superstore_Profit_Classification_Base"
 RANDOM_STATE = 42
@@ -45,6 +68,7 @@ MODEL_PARAMS = {
 }
 
 
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def log(msg): print(f"[modelling] {msg}")
 
 
@@ -68,6 +92,8 @@ def compute_metrics(y_true, y_pred, y_prob=None) -> dict:
         m["roc_auc"] = roc_auc_score(y_true, y_prob)
     return m
 
+
+# ── Artefak ───────────────────────────────────────────────────────────────────
 def save_confusion_matrix(y_true, y_pred, model_name, out_dir) -> str:
     cm = confusion_matrix(y_true, y_pred)
     fig, ax = plt.subplots(figsize=(5, 4))
@@ -135,6 +161,8 @@ def save_metrics_comparison(all_metrics: dict, out_dir: str) -> str:
     fig.savefig(path, dpi=120); plt.close(fig)
     return path
 
+
+# ── Training + MLflow logging ─────────────────────────────────────────────────
 def train_and_log(model_name, model, params,
                   X_train, X_test, y_train, y_test,
                   artifact_dir) -> dict:
@@ -190,14 +218,21 @@ def train_and_log(model_name, model, params,
         f"AUC={metrics.get('roc_auc', 'N/A')}")
     return metrics
 
+
+# ── Pipeline utama ─────────────────────────────────────────────────────────────
 def run(preproc_dir, use_dagshub, repo_owner, repo_name):
+    env_uri = os.environ.get("MLFLOW_TRACKING_URI", "")
+
     if use_dagshub:
         import dagshub
-        # Init Dagshub
-        dagshub.init(repo_owner='vincchris', repo_name='Eksperimen_ML_SML_Vincent_Christian-', mlflow=True)
+        dagshub.init(repo_owner=repo_owner, repo_name=repo_name, mlflow=True)
         log(f"DagsHub aktif: https://dagshub.com/{repo_owner}/{repo_name}.mlflow")
+    elif env_uri and env_uri != "mlruns":
+        # Pakai URI dari environment variable (CI/DagsHub via secrets)
+        mlflow.set_tracking_uri(env_uri)
+        log(f"MLflow Tracking URI dari env: {env_uri}")
     else:
-        mlflow.set_tracking_uri("http://127.0.0.1:5000/")
+        mlflow.set_tracking_uri("mlruns")
         log("Local MLflow — jalankan `mlflow ui` untuk melihat hasil.")
 
     mlflow.set_experiment(EXPERIMENT)
@@ -230,6 +265,7 @@ def run(preproc_dir, use_dagshub, repo_owner, repo_name):
     log(f"Model terbaik: {best}")
 
 
+# ── Entry point ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Modelling base tanpa tuning — MLflow manual logging")
     parser.add_argument("--preproc-dir", default=PREPROC_DIR)
