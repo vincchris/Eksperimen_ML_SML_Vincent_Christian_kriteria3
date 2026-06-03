@@ -30,6 +30,16 @@ jobs:
           pip --version
           mlflow --version
 
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.12"
+
+      - name: Install MLflow
+        run: |
+          pip install mlflow
+
       - name: Run MLflow Project
         run: |
           cd MLProject
