@@ -56,7 +56,7 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           cd MLProject
-          mlflow run . --env-manager=conda
+          mlflow run . --env-manager=conda --experiment-name "Superstore_Profit_Classification_Base"
 
       # ── 7. Get latest MLflow run_id ──────────────────────────────────────────
       - name: Get latest MLflow run_id
