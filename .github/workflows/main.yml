@@ -3,14 +3,14 @@ name: MLflow CI Pipeline
 on:
   push:
     branches:
-      - Main
+      - main
 
 jobs:
   retrain-model:
     runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Checkout ─────────────────────────────────────────────────────────
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
       - name: Run actions/checkout@v3
         uses: actions/checkout@v3
         with:
@@ -23,14 +23,14 @@ jobs:
         with:
           python-version: "3.12.7"
 
-      # ── 3. Check Env ────────────────────────────────────────────────────────
+      # ── 3. Check Env ─────────────────────────────────────────────────────────
       - name: Check Env
         run: |
           python --version
           pip --version
-          echo "PATH=$PATH"
           echo "Working directory: $(pwd)"
           ls -la
+          ls -la MLProject/
 
       # ── 4. Install dependencies ──────────────────────────────────────────────
       - name: Install dependencies
@@ -45,7 +45,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: "3.12.7"
-          activate-environment: bsml-project
+          activate-environment: superstore-env
 
       # ── 6. Run mlflow project ────────────────────────────────────────────────
       - name: Run mlflow project
@@ -55,8 +55,6 @@ jobs:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          cp modelling.py MLProject/
-          cp -r preprocessing MLProject/
           cd MLProject
           mlflow run . --env-manager=conda
 
@@ -68,18 +66,18 @@ jobs:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          RUN_ID=$(python - <<'EOF'
+          RUN_ID=$(python - <<'PYEOF'
           import mlflow, os
           mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
           client = mlflow.tracking.MlflowClient()
-          exp = client.get_experiment_by_name("Superstore_Profit_Classification")
+          exp = client.get_experiment_by_name("Superstore_Profit_Classification_Base")
           runs = client.search_runs(
               experiment_ids=[exp.experiment_id],
               order_by=["metrics.f1_score DESC"],
               max_results=1,
           )
           print(runs[0].info.run_id)
-          EOF
+          PYEOF
           )
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "Latest MLflow run_id: $RUN_ID"
@@ -89,12 +87,12 @@ jobs:
         run: |
           pip install mlflow scikit-learn pandas numpy matplotlib seaborn
 
-      # ── 9. Upload to GitHub ───────────────────────────────────────────────────
+      # ── 9. Upload to Github ───────────────────────────────────────────────────
       - name: Upload to Github
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add mlruns/ artifacts/ || true
+          git add MLProject/mlruns/ MLProject/artifacts/ || true
           git commit -m "ci: auto-update mlflow runs & artifacts [skip ci]" || echo "No changes to commit"
           git push
 
