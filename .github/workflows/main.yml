@@ -36,11 +36,18 @@ jobs:
           auto-update-conda: true
           python-version: "3.12"
 
+      - name: Check Conda
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda env list
+
       - name: Install MLflow
         run: |
           pip install mlflow
 
       - name: Run MLflow Project
+        shell: bash -l {0}
         run: |
           cd MLProject
           mlflow run .
