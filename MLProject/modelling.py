@@ -228,7 +228,6 @@ def run(preproc_dir, use_dagshub, repo_owner, repo_name):
         dagshub.init(repo_owner=repo_owner, repo_name=repo_name, mlflow=True)
         log(f"DagsHub aktif: https://dagshub.com/{repo_owner}/{repo_name}.mlflow")
     elif env_uri and env_uri != "mlruns":
-        # Pakai URI dari environment variable (CI/DagsHub via secrets)
         mlflow.set_tracking_uri(env_uri)
         log(f"MLflow Tracking URI dari env: {env_uri}")
     else:

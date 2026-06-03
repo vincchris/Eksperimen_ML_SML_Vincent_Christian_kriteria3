@@ -3,7 +3,7 @@ name: MLflow CI Pipeline
 on:
   push:
     branches:
-      - main
+      - Main
 
 jobs:
   retrain-model:
