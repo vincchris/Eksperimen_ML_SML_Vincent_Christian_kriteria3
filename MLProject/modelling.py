@@ -42,9 +42,7 @@ from sklearn.metrics import (
 
 warnings.filterwarnings("ignore")
 
-
-# ── Konfigurasi ────────────────────────────────────────────────────────────────
-PREPROC_DIR  = "preprocessing/namadataset_preprocessing"
+PREPROC_DIR  = "global_superstore_preprocessing"
 ARTIFACT_DIR = "artifacts"
 EXPERIMENT   = "Superstore_Profit_Classification_Base"
 RANDOM_STATE = 42
